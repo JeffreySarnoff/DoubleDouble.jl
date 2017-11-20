@@ -1,6 +1,21 @@
 module DoubleDouble
 
-export Double, Single
+export Double
+
+const SysFloat = Union{Float16, Float32, Float64}
+
+abstract type Accuracy end
+struct HighAccuracy <: Accuracy end
+struct LowAccuracy  <: Accuracy end
+
+abstract type AbstractDouble{T} <: AbstractFloat end
+
+struct Double{T<:SysFloat} <: AbstractDouble{T}
+    hi::T
+    lo::T
+end
+
+
 import Base:
     convert,
     *, +, -, /, sqrt, <,
