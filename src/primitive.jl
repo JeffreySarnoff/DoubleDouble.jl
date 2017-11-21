@@ -60,7 +60,7 @@ end
 """
     two_square(a)
 
-Computes `s = fl(a*a)` and `e = err(a*a)`. Faster than [`two_prod(a, a)`](@ref).
+Computes `s = fl(a*a)` and `e = err(a*a)`.
 """
 @inline function two_square(a::T) where T<:SysFloat
     p = a * a
