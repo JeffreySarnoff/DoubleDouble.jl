@@ -10,13 +10,14 @@ promote_rule(::Type{Double{T1,E1}}, ::Type{Double{T2,E2}}) where {T1<:SysFloat,T
 promote_rule(::Type{Double{T,E}}, ::Type{Rational{I}}) where {I<:Integer, T<:SysFloat, E<:Emphasis} = Double{Float64,E}
 promote_rule(::Type{Double{T,E}}, ::Type{BigInt}) where {T<:SysFloat, E<:Emphasis} = Double{Float64,E}
 promote_rule(::Type{Double{T,E}}, ::Type{BigFloat}) where {T<:SysFloat, E<:Emphasis} = Double{Float64,E}
+promote_rule(::Type{Double{T,E}}, ::Type{R}) where {R<:Real, T<:SysFloat, E<:Emphasis} = Double{Float64,E}
 
 convert(::Type{Double{T,Accuracy}}, x::Double{T,Performance}) where T<:SysFloat = Double(Accuracy, x.hi, x.lo)
 convert(::Type{Double{T,Performance}}, x::Double{T,Accuracy}) where T<:SysFloat = Double(Performance, x.hi, x.lo)
 convert(::Type{Double{T,Accuracy}}, x::Double{T,Performance}) where T<:SysFloat = Double(Accuracy, x.hi, x.lo)
 convert(::Type{Double{T,Performance}}, x::Double{T,Accuracy}) where T<:SysFloat = Double(Performance, x.hi, x.lo)
 
-function convert(::Type{Double{Float64,E}}, x::BigInt) where {I<:Integer, E<:Emphasis}
+function convert(::Type{Double{Float64,E}}, x::BigInt) where {E<:Emphasis}
     hi = Float64(x)
     lo = Float64(x - BigInt(hi))
     return Double(E, hi, lo)
@@ -34,6 +35,13 @@ function convert(::Type{Double{Float64,E}}, x::BigFloat) where {E<:Emphasis}
     return Double(E, hi, lo)
 end
 
+function convert(::Type{Double{T,E}}, x::R) where {R<:Real, T<:SysFloat, E<:Emphasis}
+    hi = Float64(x)
+    lo = Float64(x - R(hi))
+    return Double(E, hi, lo)
+end
+
+
 function convert(::Type{BigFloat}, x::Double{T,E}) where {T<:SysFloat, E<:Emphasis}
    return parse(BigFloat, string(x.hi)) + parse(BigFloat, string(x.lo))
 end
@@ -46,3 +54,14 @@ function convert(::Type{Rational{I}}, x::Double{T,E}) where {I<:Integer, T<:SysF
    bf = convert(BigFloat, x)
    return Rational{I}(bf)
 end
+
+function convert(::Type{I}, x::Double{T,E}) where {I<:Integer, T<:SysFloat, E<:Emphasis}
+   bi = convert(BigInt, x)
+   return round(I, bi)
+end
+
+function convert(::Type{R}, x::Double{T,E}) where {R<:Real. T<:SysFloat, E<:Emphasis}
+   bf = convert(BigFloat, x)
+   return round(R, bf)
+end
+
