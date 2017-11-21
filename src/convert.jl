@@ -1,4 +1,3 @@
-
 Base.promote_rule(::Type{Double{T,Accuracy}}, ::Type{Double{T,Performance}}) where T<:SysFloat = Double{T,Accuracy}
 Base.promote_rule(::Type{Double{Float64,E}}, ::Type{Double{Float32,E}}) where E<:Emphasis = Double{Float64,E}
 Base.promote_rule(::Type{Double{Float64,E}}, ::Type{Double{Float16,E}}) where E<:Emphasis = Double{Float64,E}
