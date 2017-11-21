@@ -60,7 +60,7 @@ function convert(::Type{I}, x::Double{T,E}) where {I<:Integer, T<:SysFloat, E<:E
    return round(I, bi)
 end
 
-function convert(::Type{R}, x::Double{T,E}) where {R<:Real. T<:SysFloat, E<:Emphasis}
+function convert(::Type{R}, x::Double{T,E}) where {R<:Real, T<:SysFloat, E<:Emphasis}
    bf = convert(BigFloat, x)
    return round(R, bf)
 end
