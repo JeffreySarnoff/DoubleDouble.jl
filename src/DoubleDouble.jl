@@ -4,16 +4,45 @@ export Double
 
 const SysFloat = Union{Float16, Float32, Float64}
 
-abstract type Accuracy end
-struct HighAccuracy <: Accuracy end
-struct LowAccuracy  <: Accuracy end
+# Algorithm is a Trait
+abstract type Trait end
+abstract type Emphasis <: Trait end
+struct Accuracy    <: Emphasis end
+struct Performance <: Emphasis end
+
+#=
+Accurate(::Type{Accuracy})      = true
+Accurate(::Type{Performance})   = false
+Performant(::Type{Performance}) = true
+Performant(::Type{Accuracy})    = false
+=#
 
 abstract type AbstractDouble{T} <: AbstractFloat end
 
-struct Double{T<:SysFloat} <: AbstractDouble{T}
+struct Double{T<:SysFloat, A<:Emphasis} <: AbstractDouble{T}
     hi::T
     lo::T
 end
+
+function Double(::Type{A}, hi::T, lo::T) where {T<:SysFloat, A<:Emphasis}
+    s = hi + lo
+    e = (hi - s) + lo
+    return Double{T,A}(s, e)
+end
+
+@inline Double(hi::T, lo::T) where T<:SysFloat = Double(Accuracy, hi, lo)
+@inline Double(x::T) where T<:SysFloat = Double(x, zero(T))
+@inline Double(x::T) where T<:Real = Double(Float64(x))
+@inline Double(x::T1, y::T2) where {T1<:Real, T2<:Real} = Double(Float64(x), Float64(y))
+
+#=
+Double(Performance, 1.0, ldexp(1.0, -50))
+Double(Accuracy, 1.0, ldexp(1.0, -50))
+
+Double(1.0, ldexp(1.0, -50)) == Double(Accuracy, 1.0, ldexp(1.0, -50))
+Double(123456,123456e-15)
+
+=#
 
 
 import Base:
