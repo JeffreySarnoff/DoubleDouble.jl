@@ -17,7 +17,7 @@ const one64 = one(Float64)
     @test Double(Accuracy, one32) isa Double{Float32, Accuracy}
     @test Double(Performance, one32) isa Double{Float32, Performance}
 
-    @test Double(π) isa Double{Float64, Performance}
+    @test Double(π) isa Double{Float64, EMPHASIS}
     @test Double(Accuracy, π) isa Double{Float64, Accuracy}
     @test Double(Performance, π) isa Double{Float64, Performance}
     @test Double(Accuracy, big(π)) isa Double{Float64, Accuracy}
