@@ -2,7 +2,7 @@ __precompile__()
 
 module DoubleDouble
 
-export Double, AccurateDouble, PerformantDouble
+export Double, FastDouble
 
 const SysFloat = Union{Float16, Float32, Float64}
 
@@ -35,11 +35,11 @@ function Double(::Type{E}, hi::T, lo::T) where {T<:SysFloat, E<:Emphasis}
     return Double{T,E}(s, e)
 end
 
-AccurateDouble(x)      = Double(Accuracy, x)
-AccurateDouble(x, y)   = Double(Accuracy, x, y)
+Double(x)      = Double(Accuracy, x)
+Double(x, y)   = Double(Accuracy, x, y)
 
-PerformantDouble(x)    = Double(Performance, x)
-PerformantDouble(x, y) = Double(Performance, x, y)
+FastDouble(x)    = Double(Performance, x)
+FastDouble(x, y) = Double(Performance, x, y)
 
 @inline Double(hi::T, lo::T) where T<:SysFloat = Double(EMPHASIS, hi, lo)
 @inline Double(x::T) where T<:SysFloat = Double(x, zero(T))
