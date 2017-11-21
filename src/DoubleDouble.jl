@@ -12,7 +12,10 @@ abstract type Emphasis <: Trait end
 struct Accuracy    <: Emphasis end
 struct Performance <: Emphasis end
 
-const EMPHASIS = Accuracy  # this is the default Emphasis
+const EMPHASIS     = Accuracy    # this is the default Emphasis
+
+const EMPHASIS_STR     = ""        # these are used in string()
+const ALT_EMPHASIS_STR = "Fast"
 
 abstract type AbstractDouble{T} <: AbstractFloat end
 
@@ -45,5 +48,9 @@ PerformantDouble(x, y) = Double(Performance, x, y)
 include("convert.jl")
 include("compare.jl")
 include("primitive.jl")
+
+Base.string(x::Double{T,EMPHASIS}) where T<:SysFloat = string(EMPHASIS_STR,"Double(",x.hi,", ",x.lo,")")
+Base.string(x::Double{T,ALT_EMPHASIS}) where T<:SysFloat = string(ALT_EMPHASIS_STR,"Double(",x.hi,", ",x.lo,")")
+Base.show(io::IO, x::Double{T,E}) where  {T<:SysFloat, E<:Emphasis} = print(io, string(x))
 
 end # module
