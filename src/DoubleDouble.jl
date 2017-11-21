@@ -4,36 +4,44 @@ export Double
 
 const SysFloat = Union{Float16, Float32, Float64}
 
-# Algorithm is a Trait
+# Algorithmic choice is a Trait
 abstract type Trait end
 abstract type Emphasis <: Trait end
 struct Accuracy    <: Emphasis end
 struct Performance <: Emphasis end
 
-#=
-Accurate(::Type{Accuracy})      = true
-Accurate(::Type{Performance})   = false
-Performant(::Type{Performance}) = true
-Performant(::Type{Accuracy})    = false
-=#
 
 abstract type AbstractDouble{T} <: AbstractFloat end
 
-struct Double{T<:SysFloat, A<:Emphasis} <: AbstractDouble{T}
+struct Double{T<:SysFloat, E<:Emphasis} <: AbstractDouble{T}
     hi::T
     lo::T
 end
 
-function Double(::Type{A}, hi::T, lo::T) where {T<:SysFloat, A<:Emphasis}
+Base.promote_rule(::Type{Double{T,Accuracy}}, ::Type{Double{T,Performance}}) where T<:SysFloat = Double{T,Accuracy}
+Base.convert(::Type{Double{T,Accuracy}}, x::Double{T,Performance}) = Double(Accuracy, x.hi, x.lo)
+Base.convert(::Type{Double{T,Performance}}, x::Double{T,Accuracy}) = Double(Performance, x.hi, x.lo)
+
+function Double(::Type{E}, hi::T, lo::T) where {T<:SysFloat, E<:Emphasis}
     s = hi + lo
     e = (hi - s) + lo
-    return Double{T,A}(s, e)
+    return Double{T,E}(s, e)
 end
 
 @inline Double(hi::T, lo::T) where T<:SysFloat = Double(Accuracy, hi, lo)
 @inline Double(x::T) where T<:SysFloat = Double(x, zero(T))
 @inline Double(x::T) where T<:Real = Double(Float64(x))
 @inline Double(x::T1, y::T2) where {T1<:Real, T2<:Real} = Double(Float64(x), Float64(y))
+
+function Base.(+)(x::Double{T, E}, y::Double{T, E}) where {T<:SysFloat, E<:Emphasis}
+    hi = x.hi + y.hi
+    lo = abs(x.hi) > abs(y.hi) ? (((x.hi - hi) + y.hi) + y.lo) + x.lo : (((y.hi - hi) + x.hi) + x.lo) + y.lo
+    Double(hi, lo)
+end
+
+Base.(+)(x::Double{T, E}, y::T) where {T<:SysFloat, E<:Emphasis} = (+)(x, Double(E, y))
+Base.(+)(x::T, y::Double{T, E}) where {T<:SysFloat, E<:Emphasis} = (+)(Double(E, x), y)
+Base.(+)(x::Double{T, E1}, y::Double{T, E2}) where {T<:SysFloat, E1<:Emphasis, E2<:Emphasis} = (+)(promote(x, y)...)
 
 #=
 Double(Performance, 1.0, ldexp(1.0, -50))
