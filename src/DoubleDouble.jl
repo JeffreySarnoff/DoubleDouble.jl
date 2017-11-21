@@ -2,7 +2,6 @@ __precompile__()
 
 module DoubleDouble
 
-export Double, FastDouble
 
 const SysFloat = Union{Float16, Float32, Float64}
 
@@ -60,13 +59,25 @@ function Double(::Type{E}, hi::T) where {T<:Rational, E<:Emphasis}
     return Double(E, BigFloat(hi))
 end
 
+Double(x::S) where S<:SysFloat = Double(EMPHASIS, x)
+Double(x::R) where R<:Real = Double(EMPHASIS, x)
+Double(x::S, y::S) where S<:SysFloat = Double(EMPHASIS, x)
+Double(x::R, y::R) where R<:Real = Double(EMPHASIS, x, y)
+
+FastDouble(x::R) where R<:Real       = Double(Performance, x)
+FastDouble(x::R, y::R) where R<:Real = Double(Performance, x, y)
+
+
+function Base.string(x::Double{T,EMPHASIS}) where T<:SysFloat
+    return string(EMPHASIS_STR,"Double(",x.hi,", ",x.lo,")")
+end
+function Base.string(x::Double{T,ALT_EMPHASIS}) where T<:SysFloat
+    return string(ALT_EMPHASIS_STR,"Double(",x.hi,", ",x.lo,")")
+end
+function Base.show(io::IO, x::Double{T,E}) where  {T<:SysFloat, E<:Emphasis}
+    print(io, string(x))
+end
 
 include("convert.jl")
-include("compare.jl")
-include("primitive.jl")
-
-Base.string(x::Double{T,EMPHASIS}) where T<:SysFloat = string(EMPHASIS_STR,"Double(",x.hi,", ",x.lo,")")
-Base.string(x::Double{T,ALT_EMPHASIS}) where T<:SysFloat = string(ALT_EMPHASIS_STR,"Double(",x.hi,", ",x.lo,")")
-Base.show(io::IO, x::Double{T,E}) where  {T<:SysFloat, E<:Emphasis} = print(io, string(x))
 
 end # module
