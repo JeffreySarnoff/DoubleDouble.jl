@@ -27,28 +27,19 @@ function Double(::Type{E}, hi::T, lo::T) where {T<:SysFloat, E<:Emphasis}
     return Double{T,E}(s, e)
 end
 
-Base.promote_rule(::Type{Double{T,Accuracy}}, ::Type{Double{T,Performance}}) where T<:SysFloat = Double{T,Accuracy}
-Base.convert(::Type{Double{T,Accuracy}}, x::Double{T,Performance}) = Double(Accuracy, x.hi, x.lo)
-Base.convert(::Type{Double{T,Performance}}, x::Double{T,Accuracy}) = Double(Performance, x.hi, x.lo)
+AccurateDouble(x)      = Double(Accuracy, x)
+AccurateDouble(x, y)   = Double(Accuracy, x, y)
+
+PerformantDouble(x)    = Double(Performance, x)
+PerformantDouble(x, y) = Double(Performance, x, y)
 
 @inline Double(hi::T, lo::T) where T<:SysFloat = Double(EMPHASIS, hi, lo)
 @inline Double(x::T) where T<:SysFloat = Double(x, zero(T))
 @inline Double(x::T) where T<:Real = Double(Float64(x))
 @inline Double(x::T1, y::T2) where {T1<:Real, T2<:Real} = Double(Float64(x), Float64(y))
 
-AccurateDouble(x::T) where T<:SysFloat = Double(Accuracy, x)
-AccurateDouble(x::T) where T<:Real = Double(Accuracy, x)
-AccurateDouble(x::T, y::T) where T<:SysFloat = Double(Accuracy, x, y)
-AccurateDouble(x::T1, y::T2) where {T1<:Real, T2<:Real} = Double(Accuracy, x, y)
-
-PerformantDouble(x::T) where T<:SysFloat = Double(Performance, x)
-PerformantDouble(x::T) where T<:Real = Double(Performance, x)
-PerformantDouble(x::T, y::T) where T<:SysFloat = Double(Performance, x, y)
-PerformantDouble(x::T1, y::T2) where {T1<:Real, T2<:Real} = Double(Performance, x, y)
-
+include("convert.jl")
+include("compare.jl")
 include("primitive.jl")
-
-
-
 
 end # module
