@@ -2,38 +2,53 @@ __precompile__()
 
 module DoubleDouble
 
-export Double, ComputeMode, Fast, Accurate
+export Double, AccurateDouble, PerformantDouble
 
-abstract type ComputeMode end
-struct Fast <: ComputeMode end
-struct Accurate <: ComputeMode end
+const SysFloat = Union{Float16, Float32, Float64}
 
-const CM = ComputeMode
-const SysFloat = Union{Float64, Float32}
+# Algorithmic choice is a Trait
+abstract type Trait end
+abstract type Emphasis <: Trait end
+struct Accuracy    <: Emphasis end
+struct Performance <: Emphasis end
 
-struct Double{T<:SysFloat, M<:ComputeMode} <: AbstractFloat
+const EMPHASIS = Accuracy  # this is the default Emphasis
+
+abstract type AbstractDouble{T} <: AbstractFloat end
+
+struct Double{T<:SysFloat, E<:Emphasis} <: AbstractDouble{T}
     hi::T
     lo::T
 end
 
-# constructors
-function Double{T}(x::Number, M::Type{<:CM}=Fast) where {T<:SysFloat}
-    Double{T, M}(convert(T, x), isinf(x) ? convert(T, Inf) : zero(T))
+function Double(::Type{E}, hi::T, lo::T) where {T<:SysFloat, E<:Emphasis}
+    s = hi + lo
+    e = (hi - s) + lo
+    return Double{T,E}(s, e)
 end
 
-function Double{Float32}(x::Float64, M::Type{<:CM}=Fast)
-    z = convert(Float32, x)
-    Double{Float32, M}(u, convert(Float32, x - z))
-end
+Base.promote_rule(::Type{Double{T,Accuracy}}, ::Type{Double{T,Performance}}) where T<:SysFloat = Double{T,Accuracy}
+Base.convert(::Type{Double{T,Accuracy}}, x::Double{T,Performance}) = Double(Accuracy, x.hi, x.lo)
+Base.convert(::Type{Double{T,Performance}}, x::Double{T,Accuracy}) = Double(Performance, x.hi, x.lo)
 
-Double(u::T, v::T, M::Type{<:CM}=Fast) where {T<:SysFloat} = Double{T, M}(u, v)
-function Double(x::BigFloat, M::Type{<:CM}=Fast)
-    z = convert(Float64, x)
-    Double{Float64, M}(z, convert(Float64, x - z))
-end
-function Double(x::T, M::Type{<:CM}=Fast) where {T<:SysFloat}
-    Double{T, M}(x, isinf(x) ? convert(T, Inf) : zero(T))
-end
-Double(x::Number, M::Type{<:CM}=Fast) = Double{Float64}(x, M)
+@inline Double(hi::T, lo::T) where T<:SysFloat = Double(EMPHASIS, hi, lo)
+@inline Double(x::T) where T<:SysFloat = Double(x, zero(T))
+@inline Double(x::T) where T<:Real = Double(Float64(x))
+@inline Double(x::T1, y::T2) where {T1<:Real, T2<:Real} = Double(Float64(x), Float64(y))
 
-end
+AccurateDouble(x::T) where T<:SysFloat = Double(Accuracy, x)
+AccurateDouble(x::T) where T<:Real = Double(Accuracy, x)
+AccurateDouble(x::T, y::T) where T<:SysFloat = Double(Accuracy, x, y)
+AccurateDouble(x::T1, y::T2) where {T1<:Real, T2<:Real} = Double(Accuracy, x, y)
+
+PerformantDouble(x::T) where T<:SysFloat = Double(Performance, x)
+PerformantDouble(x::T) where T<:Real = Double(Performance, x)
+PerformantDouble(x::T, y::T) where T<:SysFloat = Double(Performance, x, y)
+PerformantDouble(x::T1, y::T2) where {T1<:Real, T2<:Real} = Double(Performance, x, y)
+
+include("primitive.jl")
+
+
+
+
+end # module
