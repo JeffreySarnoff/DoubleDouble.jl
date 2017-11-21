@@ -7,6 +7,7 @@ function (+)(a::Double{T,E}, b::T) where {T<:SysFloat, E<:Emphasis}
 
     return Double(E, hi, lo)
 end
+
 +(a::T, b::Double{T,E}) where {T<:SysFloat, E<:Emphasis} = b + a
 +(a::Signed, b::Double{T,E}) where {T<:SysFloat, E<:Emphasis} = b + float(a)
 +(a::Double{T,E}, b::Signed) where {T<:SysFloat, E<:Emphasis} = a + float(b)
@@ -21,7 +22,7 @@ end
     must be exact to preserve the numerical logic throughout.
 =#
 
-function Base.:(+)(x::Double{T, E}, y::Double{T, E}) where {T<:SysFloat, E<:Emphasis}
+function (+)(x::Double{T, E}, y::Double{T, E}) where {T<:SysFloat, E<:Emphasis}
     s1, s2 = two_sum(x.hi, y.hi)
     t1, t2 = two_sum(x.lo, y.lo)
     s2 += t1
@@ -31,12 +32,12 @@ function Base.:(+)(x::Double{T, E}, y::Double{T, E}) where {T<:SysFloat, E<:Emph
     return Double(E, s1, s2)
 end
 
-Base.(+)(x::Double{T, E}, y::T) where {T<:SysFloat, E<:Emphasis} = (+)(x, Double(E, y))
-Base.(+)(x::T, y::Double{T, E}) where {T<:SysFloat, E<:Emphasis} = (+)(Double(E, x), y)
-Base.(+)(x::Double{T1, E}, y::Double{T2, E}) where {T1<:SysFloat, T2<:SysFloat, E<:Emphasis} =
++(x::Double{T, E}, y::T) where {T<:SysFloat, E<:Emphasis} = (+)(x, Double(E, y))
++(x::T, y::Double{T, E}) where {T<:SysFloat, E<:Emphasis} = (+)(Double(E, x), y)
++(x::Double{T1, E}, y::Double{T2, E}) where {T1<:SysFloat, T2<:SysFloat, E<:Emphasis} =
     (+)(promote(x, y)...)
-Base.(+)(x::Double{T, E1}, y::Double{T, E2}) where {T<:SysFloat, E1<:Emphasis, E2<:Emphasis} =
++(x::Double{T, E1}, y::Double{T, E2}) where {T<:SysFloat, E1<:Emphasis, E2<:Emphasis} =
     (+)(promote(x, y)...)
-Base.(+)(x::Double{T1, E1}, y::Double{T2, E2}) where {T1<:SysFloat, T2<:SysFloat, E1<:Emphasis, E2<:Emphasis} =
++(x::Double{T1, E1}, y::Double{T2, E2}) where {T1<:SysFloat, T2<:SysFloat, E1<:Emphasis, E2<:Emphasis} =
     (+)(promote(x, y)...)
    
