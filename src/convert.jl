@@ -7,7 +7,42 @@ promote_rule(::Type{Double{Float32,E}}, ::Type{Double{Float16,E}}) where E<:Emph
 promote_rule(::Type{Double{T1,E1}}, ::Type{Double{T2,E2}}) where {T1<:SysFloat,T2<:SysFloat,E1<:Emphasis,E2<:Emphasis} =
    Double{promote_type(T1,T2), Accuracy}
 
+promote_rule(::Type{Double{T,E}}, ::Type{Rational{I}}) where {I<:Integer, T<:SysFloat, E<:Emphasis} = Double{Float64,E}
+promote_rule(::Type{Double{T,E}}, ::Type{BigInt}) where {T<:SysFloat, E<:Emphasis} = Double{Float64,E}
+promote_rule(::Type{Double{T,E}}, ::Type{BigFloat}) where {T<:SysFloat, E<:Emphasis} = Double{Float64,E}
+
 convert(::Type{Double{T,Accuracy}}, x::Double{T,Performance}) where T<:SysFloat = Double(Accuracy, x.hi, x.lo)
 convert(::Type{Double{T,Performance}}, x::Double{T,Accuracy}) where T<:SysFloat = Double(Performance, x.hi, x.lo)
 convert(::Type{Double{T,Accuracy}}, x::Double{T,Performance}) where T<:SysFloat = Double(Accuracy, x.hi, x.lo)
 convert(::Type{Double{T,Performance}}, x::Double{T,Accuracy}) where T<:SysFloat = Double(Performance, x.hi, x.lo)
+
+function convert(::Type{Double{Float64,E}}, x::BigInt) where {I<:Integer, E<:Emphasis}
+    hi = Float64(x)
+    lo = Float64(x - BigInt(hi))
+    return Double(E, hi, lo)
+end
+
+function convert(::Type{Double{Float64,E}}, x::Rational{I}) where {I<:Integer, E<:Emphasis}
+    hi = Float64(x)
+    lo = Float64(x - I(hi))
+    return Double(E, hi, lo)
+end
+
+function convert(::Type{Double{Float64,E}}, x::BigFloat) where {E<:Emphasis}
+    hi = Float64(x)
+    lo = Float64(x - BigFloat(hi))
+    return Double(E, hi, lo)
+end
+
+function convert(::Type{BigFloat}, x::Double{T,E}) where {T<:SysFloat, E<:Emphasis}
+   return parse(BigFloat, string(x.hi)) + parse(BigFloat, string(x.lo))
+end
+
+function convert(::Type{BigInt}, x::Double{T,E}) where {T<:SysFloat, E<:Emphasis}
+   return round(BigInt, parse(BigFloat, string(x.hi)) + parse(BigFloat, string(x.lo)))
+end
+
+function convert(::Type{Rational{I}}, x::Double{T,E}) where {I<:Integer, T<:SysFloat, E<:Emphasis}
+   bf = convert(BigFloat, x)
+   return Rational{I}(bf)
+end
