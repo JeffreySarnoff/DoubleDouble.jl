@@ -35,7 +35,7 @@ function convert(::Type{Double{Float64,E}}, x::BigFloat) where {E<:Emphasis}
     return Double(E, hi, lo)
 end
 
-function convert(::Type{Double{T,E}}, x::R) where {R<:Real, T<:SysFloat, E<:Emphasis}
+function convert(::Type{Double{Float64,E}}, x::R) where {R<:Real, T<:SysFloat, E<:Emphasis}
     hi = Float64(x)
     lo = Float64(x - R(hi))
     return Double(E, hi, lo)
@@ -57,7 +57,7 @@ end
 
 function convert(::Type{I}, x::Double{T,E}) where {I<:Integer, T<:SysFloat, E<:Emphasis}
    bi = convert(BigInt, x)
-   return round(I, bi)
+   return I(bi)
 end
 
 function convert(::Type{R}, x::Double{T,E}) where {R<:Real, T<:SysFloat, E<:Emphasis}
