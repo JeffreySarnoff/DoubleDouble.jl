@@ -75,4 +75,7 @@ function convert(::Type{R}, x::Double{T,E}) where {R<:Real, T<:SysFloat, E<:Emph
    return round(R, bf)
 end
 
+Base.convert(::Type{Double{T,E}}, x::Irrational) where {T<:SysFloat, E<:Accuracy} = convert(Double{T,E}, BigFloat(x))
+Base.convert(::Type{Double{T,E}}, x::Irrational) where {T<:SysFloat, E<:Performance} = convert(Double{T,E}, BigFloat(x))
+
 
