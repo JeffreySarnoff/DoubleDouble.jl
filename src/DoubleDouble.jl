@@ -53,13 +53,13 @@ function Double(::Type{E}, hi::T) where {T<:Real, E<:Emphasis}
     return Double{Float64,E}(s,e)
 end
 
-Double(x::S) where S<:SysFloat = Double(Accuracy, x)
-Double(x::R) where R<:Real = Double(Accuracy, x)
-Double(x::S, y::S) where S<:SysFloat = Double(Accuracy, x)
-Double(x::R, y::R) where R<:Real = Double(Accuracy, x, y)
+function Double(::Type{E}, hi::T, lo::T) where {T<:Rational, E<:Emphasis}
+    return Double(E, BigFloat(hi), BigFloat(lo))
+end
+function Double(::Type{E}, hi::T) where {T<:Rational, E<:Emphasis}
+    return Double(E, BigFloat(hi))
+end
 
-FastDouble(x::R) where R<:Real       = Double(Performance, x)
-FastDouble(x::R, y::R) where R<:Real = Double(Performance, x, y)
 
 include("convert.jl")
 include("compare.jl")
