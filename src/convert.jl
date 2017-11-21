@@ -75,10 +75,8 @@ function convert(::Type{R}, x::Double{T,E}) where {R<:Real, T<:SysFloat, E<:Emph
    return round(R, bf)
 end
 
-Double(Accuracy, x::Irrational) = convert(Double{Float64,Accuracy}, BigFloat(x))
-Double(Precision, x::Irrational) = convert(Double{Float64,Precision}, BigFloat(x))
+Double(::Type{E}, x::Irrational) where E<:Emphasis = convert(Double{Float64,E},BigFloat(x))
 Double(x::Irrational) = Double(EMPHASIS, x)
-Base.convert(::Type{Double{T,E}}, x::Irrational) where {T<:SysFloat, E<:Accuracy} = Double(E, x)
-Base.convert(::Type{Double{T,E}}, x::Irrational) where {T<:SysFloat, E<:Performance} = Double(E, x)
+Base.convert(::Type{Double{T,E}}, x::Irrational) where {T<:SysFloat, E<:Emphasis} = Double(E, x)
 
 
