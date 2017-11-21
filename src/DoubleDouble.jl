@@ -21,6 +21,10 @@ struct Double{T<:SysFloat, E<:Emphasis} <: AbstractDouble{T}
     lo::T
 end
 
+function Double(::Type{E}, hi::T) where {T<:SysFloat, E<:Emphasis}
+    return Double{T,E}(hi, zero(T))
+end
+
 function Double(::Type{E}, hi::T, lo::T) where {T<:SysFloat, E<:Emphasis}
     s = hi + lo
     e = (hi - s) + lo
