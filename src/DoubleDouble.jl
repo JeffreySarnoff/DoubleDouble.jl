@@ -4,8 +4,6 @@ module DoubleDouble
 
 export Double, FastDouble
 
-
-
 const SysFloat = Union{Float16, Float32, Float64}
 
 # Algorithmic choice is a Trait
