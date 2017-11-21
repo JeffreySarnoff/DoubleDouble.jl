@@ -13,6 +13,7 @@ struct Accuracy    <: Emphasis end
 struct Performance <: Emphasis end
 
 const EMPHASIS     = Accuracy    # this is the default Emphasis
+const ALT_EMPHASIS = Performance
 
 const EMPHASIS_STR     = ""        # these are used in string()
 const ALT_EMPHASIS_STR = "Fast"
