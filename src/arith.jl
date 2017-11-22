@@ -1,13 +1,45 @@
 import Base: (+), (-), (*), (/), div, fld, cld, rem, mod, sqrt
 
-function (+)(a::Double{T,E}, b::T) where {T<:SysFloat, E<:Emphasis}
+function (+)(a::Double{T,E}, b::T) where {T,E}
     hi, lo = two_sum(a.hi, b)
     lo += a.lo
-    hi, lo = quick_two_sum(hi, lo)
+    hi, lo = two_sum_ordered(hi, lo)
 
     return Double(E, hi, lo)
 end
 
+function (+)(a::T, b::Double{T,E}) where {T,E}
+    hi, lo = two_sum(a, b.hi)
+    lo += b.lo
+    hi, lo = two_sum_ordered(hi, lo)
+
+    return Double(E, hi, lo)
+end
+
+function (+)(a::Double{T,E}, b::Double{T,E}) where {T,E}
+    hihi, hilo = two_sum(a.hi, b.hi)
+    hi, lo = two_sum(a.lo, b.lo)
+    hilo += hi
+    hi = hihi + hilo
+    hilo -= hi - hihi
+    lo += hilo
+    hi,lo = two_sum(hi, o)
+    return Double(E, hi, lo)
+end
+
+
+function (add)(a::Double{T,E}, b::Double{T,E}) where {T,E}
+    hihi, hilo = two_sum(a.hi, b.hi)
+    lohi, lolo = two_sum(a.lo, b.lo)
+    hilo += lohi
+    lohi = hihi + hilo
+    hilo -= lohi - hihi
+    hilo += lolo
+    hi,lo = two_sum(lohi,hilo)
+    return Double(E, hi, lo)
+end
+
+    
 +(a::T, b::Double{T,E}) where {T<:SysFloat, E<:Emphasis} = b + a
 +(a::Signed, b::Double{T,E}) where {T<:SysFloat, E<:Emphasis} = b + float(a)
 +(a::Double{T,E}, b::Signed) where {T<:SysFloat, E<:Emphasis} = a + float(b)
